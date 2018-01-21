@@ -1,0 +1,21 @@
+short = 10
+long = 21
+signal = 9
+
+[thresholds]
+down = -0.025
+up = 0.025
+persistence = 1
+
+[trailingstop]
+pctDrop = 3
+
+[stoploss]
+pctDrop = 3
+
+interval = 3
+
+[rsi_thresholds]
+low = 20
+high = 80
+persistence = 3

@@ -1,0 +1,4 @@
+period = 90
+history = 90
+pctDrop = 15
+pctTarget = 15

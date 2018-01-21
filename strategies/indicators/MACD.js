@@ -7,6 +7,7 @@ var Indicator = function(config) {
   this.short = new EMA(config.short);
   this.long = new EMA(config.long);
   this.signal = new EMA(config.signal);
+  this.centre = 'below';
 }
 
 Indicator.prototype.update = function(price) {
@@ -15,6 +16,11 @@ Indicator.prototype.update = function(price) {
   this.calculateEMAdiff();
   this.signal.update(this.diff);
   this.result = this.diff - this.signal.result;
+  if (this.short.result > this.long.result) {
+    this.centre = 'above';
+  } else {
+    this.centre = 'below';
+  }
 }
 
 Indicator.prototype.calculateEMAdiff = function() {
