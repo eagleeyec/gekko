@@ -42,8 +42,10 @@ const dirs = util.dirs();
 if(util.launchUI())
   return require(util.dirs().web + 'server');
 
+// Note: These parts only run if we are not using the ui
 const pipeline = require(dirs.core + 'pipeline');
 const config = util.getConfig();
+console.log(config);
 const mode = util.gekkoMode();
 
 if(

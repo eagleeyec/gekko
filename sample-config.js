@@ -216,7 +216,8 @@ config.trader = {
   key: '',
   secret: '',
   username: '', // your username, only required for specific exchanges.
-  passphrase: '' // GDAX, requires a passphrase.
+  passphrase: '', // GDAX, requires a passphrase.
+  maxBuy: 2
 }
 
 config.adviceLogger = {

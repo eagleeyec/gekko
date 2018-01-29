@@ -29,7 +29,15 @@ strat.update = function(candle) {
 }
 
 // For debugging purposes.
-strat.log = function() {
+strat.log = function(candle) {
+  var sma = this.indicators.sma.result;
+  log.debug('Candle close', candle.close, ', SMA:', sma);
+  if (this.currentTrend==='short') {
+    log.debug('No curreny open position. Looking for', this.pctDrop, 'current is', candle.close/sma);
+  } else {
+    log.debug('In open position. Target is:', this.pctTarget, 'current is', candle.close/this.boughtAt);
+  }
+
 }
 
 // Based on the newly calculated
@@ -46,8 +54,13 @@ strat.check = function(candle) {
     }
   } else {
     if ((candle.close/this.boughtAt) > this.pctTarget) {
-      this.currentTrend = 'short';
-      this.advice('short');
+      if((candle.close/sma) < this.pctDrop) {
+        // Hold the asset if the next check would buy it again anyway
+        log.debug('Going to hold even tho I have reached my target profit because we are still under the pctDrop trigger');
+      } else {
+        this.currentTrend = 'short';
+        this.advice('short');
+      }
     }
   }
 }

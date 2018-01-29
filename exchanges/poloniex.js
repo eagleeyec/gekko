@@ -116,7 +116,8 @@ Trader.prototype.buy = function(amount, price, callback) {
     callback(null, result.orderNumber);
   }.bind(this);
 
-  this.poloniex.buy(this.currency, this.asset, price, amount, set);
+  log.error('Tried to buy at polomeix with amount:', amount);
+  // this.poloniex.buy(this.currency, this.asset, price, amount, set);
 }
 
 Trader.prototype.sell = function(amount, price, callback) {
@@ -130,7 +131,8 @@ Trader.prototype.sell = function(amount, price, callback) {
     callback(null, result.orderNumber);
   }.bind(this);
 
-  this.poloniex.sell(this.currency, this.asset, price, amount, set);
+  log.error('Tried to sell at polomeix with amount:', amount);
+  // this.poloniex.sell(this.currency, this.asset, price, amount, set);
 }
 
 Trader.prototype.checkOrder = function(order, callback) {

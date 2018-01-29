@@ -32,6 +32,7 @@ var Manager = function(conf) {
   this.exchange = new Exchange(conf);
 
   this.conf = conf;
+  log.debug("Starting to manage on", this.exchangeMeta.slug, "with this config", conf)
   this.portfolio = {};
   this.fee;
   this.action;
@@ -61,6 +62,8 @@ Manager.prototype.init = function(callback) {
   log.debug('getting ticker, balance & fee from', this.exchange.name);
   var prepare = function() {
     this.starting = false;
+    this.prevAmount = 0;
+    this.profit = 0;
 
     log.info('trading at', this.exchange.name, 'ACTIVE');
     log.info(this.exchange.name, 'trading fee will be:', this.fee * 100 + '%');
@@ -126,7 +129,7 @@ Manager.prototype.setTicker = function(callback) {
 
     if(err)
       util.die(err);
-    
+
     if(_.isFunction(callback))
       callback();
   }.bind(this);
@@ -154,19 +157,37 @@ Manager.prototype.trade = function(what, retry) {
   var act = function() {
     var amount, price;
 
-    if(what === 'BUY') {
+    exchangeAmountOfCurrency=100; //this.getBalance(this.currency);
+    exchangeAmountOfAsset=0; //this.getBalance(this.asset);
 
-      amount = this.getBalance(this.currency) / this.ticker.ask;
+    log.debug('Advised to', what, '. Currently have ', exchangeAmountOfCurrency, this.conf.currency, 'and', exchangeAmountOfAsset, this.conf.asset, 'worth', exchangeAmountOfAsset*this.ticker.ask, this.conf.currency);
+
+    if(what === 'BUY') {
+      amountCurrency = Math.min(exchangeAmountOfCurrency, this.conf.maxBuy);
+      amount = amountCurrency / this.ticker.ask;
+      this.prevCurrencyAmount = amountCurrency;
+      this.prevAmount = amount;
+      this.prevTicker = this.ticker.ask;
+      log.debug('MaxBuy set to ', this.conf.maxBuy, 'meaning i will buy', amountCurrency, this.conf.currency, 'worth of', this.conf.asset, '@', this.ticker.ask, 'which is', amount, this.conf.asset);
       if(amount > 0){
           price = this.ticker.bid;
-          this.buy(amount, price);
+          // this.buy(amount, price);
       }
     } else if(what === 'SELL') {
-
-      amount = this.getBalance(this.asset) - this.keepAsset;
+      if(this.prevAmount>0){
+        amount = this.prevAmount;
+        profit = (amount*this.ticker.ask) - this.prevCurrencyAmount;
+        this.profit = this.profit + profit;
+        log.debug('Planning to sell', amount, this.asset, '@', this.ticker.ask, 'which was bought for', this.prevTicker, 'for a profit of', profit, this.conf.currency);
+        log.debug('Cumulating profit:', this.profit);
+      }else{
+        amount=0;
+        log.debug('Seems I have not bought yet, so cannot sell.');
+      }
+      log.debug('Planning to sell with amount:', amount);
       if(amount > 0){
           price = this.ticker.ask;
-          this.sell(amount, price);
+          // this.sell(amount, price);
       }
     }
   };
@@ -213,7 +234,8 @@ Manager.prototype.buy = function(amount, price) {
     'price:',
     price
   );
-  this.exchange.buy(amount, price, this.noteOrder);
+  log.debug('Planning to buy with amount:', amount);
+  // this.exchange.buy(amount, price, this.noteOrder);
 };
 
 // first do a quick check to see whether we can sell
@@ -244,7 +266,8 @@ Manager.prototype.sell = function(amount, price) {
     'price:',
     price
   );
-  this.exchange.sell(amount, price, this.noteOrder);
+  log.debug('Planning to sell with amount:', amount);
+  // this.exchange.sell(amount, price, this.noteOrder);
 };
 
 Manager.prototype.noteOrder = function(err, order) {
